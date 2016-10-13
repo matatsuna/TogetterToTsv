@@ -1,5 +1,6 @@
 from html.parser import HTMLParser
 from urllib.request import urlopen
+import sys
 class MyHTMLParser(HTMLParser):
     def __init__(self):
         HTMLParser.__init__(self)
@@ -36,22 +37,24 @@ class MonoHTMLParser(HTMLParser):
             self.tmp = attrs.get('data-timestamp')
 
 if __name__ == "__main__":
-    site = 826473
-    txt = open('foo.txt', 'w',encoding='utf-8')
+    site = sys.argv
+    site = site[1] #サイトのid
+    if site == "":
+        sys.exit()
+    txt = open('togetter_'+str(site)+'.tsv', 'w',encoding='utf-8')
     i = 1
     url = 'http://togetter.com/li/'+str(site)+'?page='
     f = urlopen(url+'1')
     monoparser = MonoHTMLParser()
     monoparser.feed(f.read().decode('utf-8'))
     monotime = monoparser.tmp #1ページ目の最後のタイムスタンプを取得
-#    print(monotime)
     while True:
         f = urlopen(url+str(i))
         read = f.read().decode('utf-8')
         monoparser = MonoHTMLParser()
         monoparser.feed(read)
         ftime = monoparser.tmp #各ページの最後のタイムスタンプを取得
-        print(ftime)
+#        print(ftime)
         if monotime == ftime and i>2: #同じタイムスタンプが出て来たらbreak
             break
         parser = MyHTMLParser()
